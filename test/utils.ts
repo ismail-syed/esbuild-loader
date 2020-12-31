@@ -1,8 +1,7 @@
 import path from 'path';
 import fs from 'fs';
-import {ufs} from 'unionfs';
-import {Volume, DirectoryJSON} from 'memfs';
-import {ESBuildPlugin} from '..';
+import { ufs } from 'unionfs';
+import { Volume, DirectoryJSON } from 'memfs';
 import {
 	Configuration as Wp4Configuration,
 	Stats,
@@ -11,7 +10,8 @@ import {
 	Configuration as Wp5Configuration,
 	ModuleOptions,
 } from 'webpack5';
-import {SetRequired} from 'type-fest';
+import { SetRequired } from 'type-fest';
+import { ESBuildPlugin } from '..';
 
 const esbuildLoaderPath = require.resolve('esbuild-loader');
 
@@ -23,7 +23,7 @@ type Wp5TestBuildConfig = SetRequired<Wp5Configuration, 'plugins'> & {
 
 type WpBuildConfig = Wp4TestBuildConfig | Wp5TestBuildConfig;
 
-export async function build(
+async function build(
 	webpack: any,
 	volJson: DirectoryJSON,
 	configure?: (config: WpBuildConfig) => void,
@@ -31,7 +31,7 @@ export async function build(
 	return new Promise((resolve, reject) => {
 		const mfs = Volume.fromJSON(volJson);
 
-		// @ts-expect-error
+		// @ts-expect-error join isn't a property of the interface
 		mfs.join = path.join.bind(path);
 
 		const config: WpBuildConfig = {
@@ -74,9 +74,9 @@ export async function build(
 		compiler.inputFileSystem = ufs.use(fs).use(mfs as any);
 		compiler.outputFileSystem = mfs;
 
-		compiler.run((err: Error, stats: Stats) => {
-			if (err) {
-				reject(err);
+		compiler.run((error: Error, stats: Stats) => {
+			if (error) {
+				reject(error);
 				return;
 			}
 
@@ -95,5 +95,9 @@ export async function build(
 	});
 }
 
-export const getFile = (stats: Stats, filePath: string) =>
-	(stats.compilation.compiler.outputFileSystem as any).readFileSync(filePath, 'utf-8');
+const getFile = (stats: Stats, filePath: string) => (stats.compilation.compiler.outputFileSystem as any).readFileSync(filePath, 'utf-8');
+
+export {
+	build,
+	getFile,
+};

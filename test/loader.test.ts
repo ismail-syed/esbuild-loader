@@ -1,6 +1,6 @@
 import webpack4 from 'webpack';
 import webpack5 from 'webpack5';
-import {build, getFile} from './utils';
+import { build, getFile } from './utils';
 import * as fixtures from './fixtures';
 
 describe.each([
@@ -9,7 +9,7 @@ describe.each([
 ])('%s', (_name, webpack) => {
 	describe('Error handling', () => {
 		test('tsx handled as ts', async () => {
-			const runBuild = async () => build(webpack, fixtures.tsx, config => {
+			const runBuild = async () => build(webpack, fixtures.tsx, (config) => {
 				config.module.rules.push({
 					test: /\.tsx$/,
 					loader: 'esbuild-loader',
@@ -22,7 +22,7 @@ describe.each([
 		});
 
 		test('invalid tsx', async () => {
-			const runBuild = async () => build(webpack, fixtures.invalidTsx, config => {
+			const runBuild = async () => build(webpack, fixtures.invalidTsx, (config) => {
 				config.module.rules.push({
 					test: /\.tsx?$/,
 					loader: 'esbuild-loader',
@@ -44,7 +44,7 @@ describe.each([
 		});
 
 		test('tsx', async () => {
-			const stats = await build(webpack, fixtures.tsx, config => {
+			const stats = await build(webpack, fixtures.tsx, (config) => {
 				config.module.rules.push({
 					test: /\.tsx$/,
 					loader: 'esbuild-loader',
@@ -58,7 +58,7 @@ describe.each([
 		});
 
 		test('ts', async () => {
-			const stats = await build(webpack, fixtures.ts, config => {
+			const stats = await build(webpack, fixtures.ts, (config) => {
 				config.module.rules.push({
 					test: /\.ts$/,
 					loader: 'esbuild-loader',
@@ -73,11 +73,14 @@ describe.each([
 
 		test('ts as tsx', async () => {
 			/*
-			 * Catch errror "Transform failed with 1 error:\n/use-previous.ts:5:2: error: Unexpected \"const\""
+			 * Catch errror:
+			 * > Transform failed with 1 error:
+			 * > /use-previous.ts:5:2: error: Unexpected "const"
+			 *
 			 * If a TS file is accidentally parsed as TSX, it should fallback to parsing as TS
 			 * This is to support ts-loader like syntax: test: /\.tsx?$/
 			 */
-			const stats = await build(webpack, fixtures.ts, config => {
+			const stats = await build(webpack, fixtures.ts, (config) => {
 				config.module.rules.push({
 					test: /\.tsx?$/,
 					loader: 'esbuild-loader',
@@ -92,11 +95,14 @@ describe.each([
 
 		test('ts as tsx 2', async () => {
 			/*
-			 * Catch errror "Transform failed with 1 error:\n/use-previous.ts:5:27: error: Expected \"}\" but found \":\""
+			 * Catch errror:
+			 * > Transform failed with 1 error:
+			 * > /use-previous.ts:5:27: error: Expected "}" but found ":"
+			 *
 			 * If a TS file is accidentally parsed as TSX, it should fallback to parsing as TS
 			 * This is to support ts-loader like syntax: test: /\.tsx?$/
 			 */
-			const stats = await build(webpack, fixtures.ts2, config => {
+			const stats = await build(webpack, fixtures.ts2, (config) => {
 				config.module.rules.push({
 					test: /\.tsx?$/,
 					loader: 'esbuild-loader',
@@ -110,7 +116,7 @@ describe.each([
 		});
 
 		test('ts w/ tsconfig', async () => {
-			const stats = await build(webpack, fixtures.ts, config => {
+			const stats = await build(webpack, fixtures.ts, (config) => {
 				config.module.rules.push({
 					test: /\.ts$/,
 					loader: 'esbuild-loader',
@@ -129,7 +135,7 @@ describe.each([
 		});
 
 		test('tsx w/ tsconfig', async () => {
-			const stats = await build(webpack, fixtures.tsx, config => {
+			const stats = await build(webpack, fixtures.tsx, (config) => {
 				config.module.rules.push({
 					test: /\.tsx$/,
 					loader: 'esbuild-loader',
@@ -151,7 +157,7 @@ describe.each([
 
 	// Targets
 	test('target', async () => {
-		const stats = await build(webpack, fixtures.target, config => {
+		const stats = await build(webpack, fixtures.target, (config) => {
 			// @ts-expect-error
 			config.module.rules[0].options = {
 				target: 'es2015',
@@ -163,7 +169,7 @@ describe.each([
 
 	describe('Source-map', () => {
 		test('source-map eval', async () => {
-			const stats = await build(webpack, fixtures.js, config => {
+			const stats = await build(webpack, fixtures.js, (config) => {
 				config.devtool = 'eval-source-map';
 			});
 
@@ -171,7 +177,7 @@ describe.each([
 		});
 
 		test('source-map inline', async () => {
-			const stats = await build(webpack, fixtures.js, config => {
+			const stats = await build(webpack, fixtures.js, (config) => {
 				config.devtool = 'inline-source-map';
 			});
 
@@ -179,7 +185,7 @@ describe.each([
 		});
 
 		test('source-map file', async () => {
-			const stats = await build(webpack, fixtures.js, config => {
+			const stats = await build(webpack, fixtures.js, (config) => {
 				config.devtool = 'source-map';
 			});
 
@@ -188,7 +194,7 @@ describe.each([
 		});
 
 		test('source-map plugin', async () => {
-			const stats = await build(webpack, fixtures.js, config => {
+			const stats = await build(webpack, fixtures.js, (config) => {
 				delete config.devtool;
 				// @ts-expect-error
 				config.plugins.push(new webpack.SourceMapDevToolPlugin({}));
@@ -201,7 +207,7 @@ describe.each([
 	test('webpack magic comments', async () => {
 		const stats = await build(webpack, fixtures.webpackChunks);
 
-		const {assets} = stats.compilation;
+		const { assets } = stats.compilation;
 		expect(getFile(stats, '/dist/index.js')).toMatchSnapshot();
 		expect(assets).toHaveProperty(['named-chunk-foo.js']);
 		expect(getFile(stats, '/dist/named-chunk-foo.js')).toMatchSnapshot();

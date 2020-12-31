@@ -1,8 +1,8 @@
-import {startService} from 'esbuild';
-import {Compiler} from './interfaces';
+import { startService } from 'esbuild';
+import { Compiler } from './interfaces';
 
 class ESBuildPlugin {
-	apply(compiler: Compiler) {
+	apply(compiler: Compiler): void {
 		let watching = false;
 
 		const safeStartService = async () => {
@@ -11,8 +11,8 @@ class ESBuildPlugin {
 			}
 		};
 
-		compiler.hooks.thisCompilation.tap('esbuild', compilation => {
-			compilation.hooks.childCompiler.tap('esbuild', childCompiler => {
+		compiler.hooks.thisCompilation.tap('esbuild', (compilation) => {
+			compilation.hooks.childCompiler.tap('esbuild', (childCompiler) => {
 				childCompiler.$esbuildService = compiler.$esbuildService;
 			});
 		});

@@ -1,6 +1,6 @@
+import { getOptions } from 'loader-utils';
 import webpack = require('webpack');
-import {getOptions} from 'loader-utils';
-import {Compiler, LoaderOptions} from './interfaces';
+import { Compiler, LoaderOptions } from './interfaces';
 
 const tsxTryTsLoaderPtrn = /Unexpected|Expected/;
 
@@ -29,11 +29,11 @@ async function ESBuildLoader(
 	};
 
 	try {
-		const result = await service.transform(source, transformOptions).catch(async error => {
+		const result = await service.transform(source, transformOptions).catch(async (error) => {
 			// Target might be a TS file accidentally parsed as TSX
 			if (transformOptions.loader === 'tsx' && tsxTryTsLoaderPtrn.test(error.message)) {
 				transformOptions.loader = 'ts';
-				return service.transform(source, transformOptions).catch(_ => {
+				return service.transform(source, transformOptions).catch(() => {
 					throw error;
 				});
 			}
