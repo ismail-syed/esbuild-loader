@@ -35,7 +35,7 @@ class ESBuildMinifyPlugin {
 		}
 	}
 
-	apply(compiler: Compiler) {
+	apply(compiler: Compiler): void {
 		compiler.hooks.compilation.tap(pluginName, (compilation) => {
 			assert(compiler.$esbuildService, '[esbuild-loader] You need to add ESBuildPlugin to your webpack config first');
 
@@ -76,7 +76,7 @@ class ESBuildMinifyPlugin {
 	async transformAssets(
 		compilation: webpack.compilation.Compilation,
 		assetNames: string[],
-	) {
+	): Promise<void> {
 		const {
 			options: {
 				devtool,

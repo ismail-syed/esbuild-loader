@@ -81,7 +81,9 @@ describe.each([
 
 		test('ts as tsx', async () => {
 			/*
-			 * Catch errror "Transform failed with 1 error:\n/use-previous.ts:5:2: error: Unexpected \"const\""
+			 * Catch errror:
+			 * > Transform failed with 1 error:\n/use-previous.ts:5:2: error: Unexpected "const"
+			 *
 			 * If a TS file is accidentally parsed as TSX, it should fallback to parsing as TS
 			 * This is to support ts-loader like syntax: test: /\.tsx?$/
 			 */
@@ -100,7 +102,10 @@ describe.each([
 
 		test('ts as tsx 2', async () => {
 			/*
-			 * Catch errror "Transform failed with 1 error:\n/use-previous.ts:5:27: error: Expected \"}\" but found \":\""
+			 * Catch errror:
+			 * > Transform failed with 1 error:
+			 * > /use-previous.ts:5:27: error: Expected "}" but found ":"
+			 *
 			 * If a TS file is accidentally parsed as TSX, it should fallback to parsing as TS
 			 * This is to support ts-loader like syntax: test: /\.tsx?$/
 			 */

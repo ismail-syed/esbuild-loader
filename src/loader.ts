@@ -7,7 +7,7 @@ const tsxTryTsLoaderPtrn = /Unexpected|Expected/;
 async function ESBuildLoader(
 	this: webpack.loader.LoaderContext,
 	source: string,
-) {
+): Promise<void> {
 	const done = this.async() as webpack.loader.loaderCallback;
 	const options: LoaderOptions = getOptions(this);
 	const service = (this._compiler as Compiler).$esbuildService;
@@ -33,7 +33,9 @@ async function ESBuildLoader(
 			// Target might be a TS file accidentally parsed as TSX
 			if (transformOptions.loader === 'tsx' && tsxTryTsLoaderPtrn.test(error.message)) {
 				transformOptions.loader = 'ts';
-				return service.transform(source, transformOptions).catch(() => {
+
+				// eslint-disable-next-line promise/no-nesting
+				return await service.transform(source, transformOptions).catch(() => {
 					throw error;
 				});
 			}
