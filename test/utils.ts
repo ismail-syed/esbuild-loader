@@ -11,7 +11,7 @@ import {
 	ModuleOptions,
 } from 'webpack5';
 import { SetRequired } from 'type-fest';
-import { ESBuildPlugin } from '..';
+import { ESBuildPlugin } from '../dist/index.js';
 
 const esbuildLoaderPath = require.resolve('esbuild-loader');
 
@@ -30,8 +30,7 @@ const build = async (
 ): Promise<Stats> => await new Promise((resolve, reject) => {
 	const mfs = Volume.fromJSON(volJson);
 
-	// @ts-expect-error
-	mfs.join = path.join.bind(path);
+	(<typeof mfs & { join: typeof path.join; }>mfs).join = path.join.bind(path);
 
 	const config: WpBuildConfig = {
 		mode: 'development',
@@ -95,7 +94,7 @@ const build = async (
 
 const getFile = (stats: Stats, filePath: string): {
 	content: string,
-	execute(string?): any;
+	execute(prefixCode?: string): any;
 } => {
 	const content: string = (stats.compilation.compiler.outputFileSystem as any).readFileSync(filePath, 'utf-8').toString();
 

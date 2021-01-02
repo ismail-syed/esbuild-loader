@@ -179,7 +179,7 @@ describe.each([
 	// Targets
 	test('target', async () => {
 		const stats = await build(webpack, fixtures.js, (config) => {
-			// @ts-expect-error
+			// @ts-expect-error 'options' does not exist on type RuleSetRule
 			config.module.rules[0].options = {
 				target: 'es2015',
 			};
@@ -223,7 +223,8 @@ describe.each([
 		test('source-map plugin', async () => {
 			const stats = await build(webpack, fixtures.js, (config) => {
 				delete config.devtool;
-				// @ts-expect-error
+
+				// @ts-expect-error not assignable to parameter
 				config.plugins.push(new webpack.SourceMapDevToolPlugin({}));
 			});
 			const file = getFile(stats, '/dist/index.js');

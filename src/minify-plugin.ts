@@ -14,14 +14,13 @@ type Asset = webpack.compilation.Asset;
 const isJsFile = /\.js$/i;
 const pluginName = 'esbuild-minify';
 
-const flatMap = (
-	array: any[],
-	callback: (element: any) => any,
-) => (
-	array.flatMap
-		? array.flatMap(callback) // eslint-disable-line unicorn/no-fn-reference-in-iterator
-		: [].concat(...array.map(callback)) // eslint-disable-line unicorn/no-fn-reference-in-iterator
-);
+const flatMap = <T, U>(
+	array: T[],
+	callback: (value: T) => U[],
+): U[] => (
+		// eslint-disable-next-line unicorn/no-fn-reference-in-iterator
+		Array.prototype.concat(...array.map(callback))
+	);
 
 class ESBuildMinifyPlugin {
 	private readonly options: MinifyPluginOptions;
