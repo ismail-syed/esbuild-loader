@@ -1,5 +1,5 @@
 import { getOptions } from 'loader-utils';
-import webpack = require('webpack');
+import webpack from 'webpack';
 import { Compiler, LoaderOptions } from './interfaces';
 
 const tsxTryTsLoaderPtrn = /Unexpected|Expected/;

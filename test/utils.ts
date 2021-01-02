@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { ufs } from 'unionfs';
 import { Volume, DirectoryJSON } from 'memfs';
+import { ESBuildPlugin } from '..';
 import {
 	Configuration as Wp4Configuration,
 	Stats,
@@ -11,7 +12,6 @@ import {
 	ModuleOptions,
 } from 'webpack5';
 import { SetRequired } from 'type-fest';
-import { ESBuildPlugin } from '..';
 
 const esbuildLoaderPath = require.resolve('esbuild-loader');
 
@@ -23,7 +23,7 @@ type Wp5TestBuildConfig = SetRequired<Wp5Configuration, 'plugins'> & {
 
 type WpBuildConfig = Wp4TestBuildConfig | Wp5TestBuildConfig;
 
-async function build(
+export async function build(
 	webpack: any,
 	volJson: DirectoryJSON,
 	configure?: (config: WpBuildConfig) => void,
@@ -31,7 +31,7 @@ async function build(
 	return new Promise((resolve, reject) => {
 		const mfs = Volume.fromJSON(volJson);
 
-		// @ts-expect-error join isn't a property of the interface
+		// @ts-expect-error
 		mfs.join = path.join.bind(path);
 
 		const config: WpBuildConfig = {
@@ -95,9 +95,14 @@ async function build(
 	});
 }
 
-const getFile = (stats: Stats, filePath: string) => (stats.compilation.compiler.outputFileSystem as any).readFileSync(filePath, 'utf-8');
+export const getFile = (stats: Stats, filePath: string) => {
+	const content = (stats.compilation.compiler.outputFileSystem as any).readFileSync(filePath, 'utf-8');
 
-export {
-	build,
-	getFile,
+	return {
+		content,
+		execute(prefixCode = '') {
+			// eslint-disable-next-line no-eval,@typescript-eslint/restrict-plus-operands
+			return eval(prefixCode + content);
+		},
+	};
 };

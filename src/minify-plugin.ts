@@ -2,7 +2,7 @@ import assert from 'assert';
 import { RawSource, SourceMapSource } from 'webpack-sources';
 import { RawSourceMap } from 'source-map';
 import { matchObject } from 'webpack/lib/ModuleFilenameHelpers.js';
-import webpack = require('webpack');
+import webpack from 'webpack';
 import { Compiler, MinifyPluginOptions } from './interfaces';
 
 // Messes with TypeScript rootDir
@@ -53,7 +53,7 @@ class ESBuildMinifyPlugin {
 						name: pluginName,
 						stage: (compilation.constructor as any).PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE,
 					},
-					async (assets: Asset[]) => this.transformAssets(compilation, Object.keys(assets)),
+					async (assets: Asset[]) => await this.transformAssets(compilation, Object.keys(assets)),
 				);
 
 				hooks.statsPrinter.tap(pluginName, (stats: any) => {
@@ -64,7 +64,7 @@ class ESBuildMinifyPlugin {
 			} else {
 				compilation.hooks.optimizeChunkAssets.tapPromise(
 					pluginName,
-					async chunks => this.transformAssets(
+					async chunks => await this.transformAssets(
 						compilation,
 						flatMap(chunks, chunk => chunk.files),
 					),
