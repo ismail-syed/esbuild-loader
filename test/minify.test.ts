@@ -1,6 +1,6 @@
 import webpack4 from 'webpack';
 import webpack5 from 'webpack5';
-import { ESBuildMinifyPlugin } from '..';
+import { ESBuildMinifyPlugin } from '../dist/index.js';
 import { build, getFile } from './utils';
 import * as fixtures from './fixtures';
 

@@ -1,6 +1,5 @@
 import assert from 'assert';
 import { RawSource, SourceMapSource } from 'webpack-sources';
-import { RawSourceMap } from 'source-map';
 import { matchObject } from 'webpack/lib/ModuleFilenameHelpers.js';
 import webpack from 'webpack';
 import { Compiler, MinifyPluginOptions } from './interfaces';
@@ -159,7 +158,7 @@ class ESBuildMinifyPlugin {
 							assetName,
 							<any>result.map,
 							source?.toString(),
-							(map as RawSourceMap),
+							map!,
 							true,
 						)
 						: new RawSource(result.code || ''),
