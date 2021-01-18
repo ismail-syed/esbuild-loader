@@ -5,6 +5,29 @@ import { matchObject } from 'webpack/lib/ModuleFilenameHelpers.js';
 import webpack from 'webpack';
 import { Compiler, MinifyPluginOptions } from './interfaces';
 
+type KnownStatsPrinterContext = {
+	formatFlag(flag: string): string;
+	green(string: string): string;
+};
+
+type Tappable = {
+	tap(
+		name: string,
+		callback: (
+			minimized: boolean,
+			statsPrinterContext: KnownStatsPrinterContext,
+		) => void,
+	): void;
+};
+
+type StatsPrinter = {
+	hooks: {
+		print: {
+			for(name: string): Tappable;
+		},
+	},
+};
+
 // Messes with TypeScript rootDir
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { version } = require('../package.json');
@@ -45,20 +68,37 @@ class ESBuildMinifyPlugin {
 			});
 			compilation.hooks.chunkHash.tap(pluginName, (_, hash) => hash.update(meta));
 
-			const hooks = (compilation.hooks as any);
-			if (hooks.processAssets) {
-				hooks.processAssets.tapPromise(
+			type Wp5Compilation = typeof compilation & {
+				hooks: typeof compilation.hooks & {
+					processAssets: typeof compilation.hooks.optimizeAssets;
+					statsPrinter: typeof compilation.hooks.childCompiler; // could be any SyncHook
+				};
+				constructor: {
+					PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE: number;
+				};
+			};
+
+			if ('processAssets' in compilation.hooks) {
+				const wp5Compilation = <Wp5Compilation>compilation;
+				wp5Compilation.hooks.processAssets.tapPromise(
 					{
 						name: pluginName,
-						stage: (compilation.constructor as any).PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE,
+						stage: wp5Compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE,
 					},
 					async (assets: Asset[]) => await this.transformAssets(compilation, Object.keys(assets)),
 				);
 
-				hooks.statsPrinter.tap(pluginName, (stats: any) => {
-					stats.hooks.print
+				wp5Compilation.hooks.statsPrinter.tap(pluginName, (statsPrinter: StatsPrinter) => {
+					statsPrinter.hooks.print
 						.for('asset.info.minimized')
-						.tap(pluginName, (minimized: boolean, { green, formatFlag }: any) => (minimized ? green(formatFlag('minimized')) : undefined));
+						.tap(
+							pluginName,
+							(minimized, { green, formatFlag }) => (
+								minimized
+									? green(formatFlag('minimized'))
+									: undefined
+							),
+						);
 				});
 			} else {
 				compilation.hooks.optimizeChunkAssets.tapPromise(
@@ -117,16 +157,16 @@ class ESBuildMinifyPlugin {
 						? new SourceMapSource(
 							result.code || '',
 							assetName,
-							result.map as any,
+							<any>result.map,
 							source?.toString(),
 							(map as RawSourceMap),
 							true,
 						)
 						: new RawSource(result.code || ''),
-					{
+					<any>{
 						...info,
 						minimized: true,
-					} as any,
+					},
 				);
 			});
 
