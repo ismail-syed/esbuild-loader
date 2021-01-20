@@ -1,5 +1,5 @@
 {
-	"name": "@ismail-syed/esbuild-loader",
+	"name": "ismail-syed-esbuild-loader",
 	"version": "2.9.0-beta.1",
 	"description": "⚡️ Speed up your Webpack build with esbuild",
 	"keywords": [
