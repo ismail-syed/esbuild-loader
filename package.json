@@ -10,11 +10,6 @@
 		"esnext"
 	],
 	"license": "MIT",
-	"repository": "privatenumber/esbuild-loader",
-	"author": {
-		"name": "Hiroki Osame",
-		"email": "hiroki.osame@gmail.com"
-	},
 	"files": [
 		"dist"
 	],
