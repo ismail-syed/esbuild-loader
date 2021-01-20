@@ -1,6 +1,6 @@
 {
-	"name": "esbuild-loader",
-	"version": "0.0.0-semantic-release",
+	"name": "@ismail-syed/esbuild-loader",
+	"version": "2.9.0-beta.1",
 	"description": "⚡️ Speed up your Webpack build with esbuild",
 	"keywords": [
 		"esbuild",
@@ -24,11 +24,6 @@
 		"pretest": "npm run build",
 		"test": "jest --coverage",
 		"lint": "xo"
-	},
-	"husky": {
-		"hooks": {
-			"pre-commit": "lint-staged"
-		}
 	},
 	"lint-staged": {
 		"*.ts": [

@@ -1,47 +1,64 @@
-import webpack = require('webpack');
-import {getOptions} from 'loader-utils';
-import {Compiler, LoaderOptions} from './interfaces';
+import webpack = require("webpack");
+import { getOptions } from "loader-utils";
+import { BuildOptions } from "esbuild";
+import { existsSync } from "fs";
+import { Compiler } from "./interfaces";
 
-const tsxTryTsLoaderPtrn = /Unexpected|Expected/;
+interface LoaderOptions {
+	buildOptions: BuildOptions;
+}
 
 async function ESBuildLoader(
 	this: webpack.loader.LoaderContext,
-	source: string,
+	source: string
 ) {
 	const done = this.async()!;
-	const options: LoaderOptions = getOptions(this);
+	const options = getOptions(this);
 	const service = (this._compiler as Compiler).$esbuildService;
 
 	if (!service) {
 		done(
 			new Error(
-				'[esbuild-loader] You need to add ESBuildPlugin to your webpack config first',
-			),
+				"[esbuild-loader] You need to add ESBuildPlugin to your webpack config first"
+			)
 		);
 		return;
 	}
 
-	const transformOptions = {
-		...options,
-		target: options.target ?? 'es2015',
-		loader: options.loader ?? 'js',
+	// webpack-virtual-modules react-server/webpack-plugin
+	// if we hit a virutal file, we need to use s
+
+	const fileExists = existsSync(this.resourcePath);
+	const baseOptions = {
+		...(fileExists
+			? { entryPoints: [this.resourcePath] }
+			: {
+					stdin: {
+						contents: source,
+						sourcefile: this.resourcePath,
+						loader: "js",
+					},
+			  }),
+		loader: {
+			".esnext": "js",
+		},
+		target: "es2015",
+		write: false,
+		format: "cjs",
 		sourcemap: this.sourceMap,
-		sourcefile: this.resourcePath,
 	};
 
 	try {
-		const result = await service.transform(source, transformOptions).catch(async error => {
-			// Target might be a TS file accidentally parsed as TSX
-			if (transformOptions.loader === 'tsx' && tsxTryTsLoaderPtrn.test(error.message)) {
-				transformOptions.loader = 'ts';
-				return service.transform(source, transformOptions).catch(_ => {
-					throw error;
-				});
-			}
+		const result = await service.build({
+			...baseOptions,
+			...(options.buildOptions as LoaderOptions["buildOptions"]),
+		} as BuildOptions);
 
-			throw error;
-		});
-		done(null, result.code, result.map);
+		if (!result.outputFiles) {
+			throw Error(`ESBuild loader failed on: ${this.resourcePath}`);
+		}
+
+		done(null, result.outputFiles[0].text);
 	} catch (error: unknown) {
 		done(error as Error);
 	}
